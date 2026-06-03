@@ -1,0 +1,41 @@
+name: Build Android APK
+
+# Запускать workflow вручную из вкладки Actions
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      # 1. Загружаем код из репозитория
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Устанавливаем Java (необходима для Android-сборки)
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      # 3. Устанавливаем Flutter
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
+      # 4. Устанавливаем зависимости проекта
+      - name: Install dependencies
+        run: flutter pub get
+
+      # 5. Собираем APK в режиме Release
+      - name: Build APK
+        run: flutter build apk --release
+
+      # 6. Сохраняем готовый APK как артефакт сборки
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: smilecraft-app-release
+          path: build/app/outputs/flutter-apk/app-release.apk
